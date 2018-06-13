@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results skipped="0" failed="0" ignored="0" total="1" passed="1">
+  <reporter-output>
+  </reporter-output>
+  <suite name="TestAll" duration-ms="27225" started-at="2016-12-17T05:14:41Z" finished-at="2016-12-17T05:15:08Z">
+    <groups>
+    </groups>
+    <test name="Test" duration-ms="27225" started-at="2016-12-17T05:14:41Z" finished-at="2016-12-17T05:15:08Z">
+      <class name="globaCom.suite.DriverScript">
+        <test-method status="PASS" signature="setUp()[pri:0, instance:globaCom.suite.DriverScript@685cb137]" name="setUp" is-config="true" duration-ms="12592" started-at="2016-12-17T10:44:41Z" finished-at="2016-12-17T10:44:53Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- setUp -->
+        <test-method status="PASS" signature="TestScript()[pri:0, instance:globaCom.suite.DriverScript@685cb137]" name="TestScript" duration-ms="13092" started-at="2016-12-17T10:44:53Z" finished-at="2016-12-17T10:45:06Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- TestScript -->
+        <test-method status="PASS" signature="tearDown()[pri:0, instance:globaCom.suite.DriverScript@685cb137]" name="tearDown" is-config="true" duration-ms="1516" started-at="2016-12-17T10:45:06Z" finished-at="2016-12-17T10:45:08Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- tearDown -->
+      </class> <!-- globaCom.suite.DriverScript -->
+    </test> <!-- Test -->
+  </suite> <!-- TestAll -->
+</testng-results>

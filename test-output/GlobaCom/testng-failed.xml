@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite guice-stage="DEVELOPMENT" name="Failed suite [GlobaCom]">
+  <test name="GlobaComSuite(failed)">
+    <classes>
+      <class name="globaCom.suite.DriverScript">
+        <methods>
+          <include name="TestScript"/>
+          <include name="tearDown"/>
+          <include name="setUp"/>
+        </methods>
+      </class> <!-- globaCom.suite.DriverScript -->
+    </classes>
+  </test> <!-- GlobaComSuite(failed) -->
+</suite> <!-- Failed suite [GlobaCom] -->
