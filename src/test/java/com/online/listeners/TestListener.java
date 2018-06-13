@@ -10,12 +10,17 @@ import org.openqa.selenium.WebDriver;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
+import com.online.baseClass.TestBase;
 
-import com.online.resources.DriverScript;
 
-public class TestListener implements ITestListener{
-	 private WebDriver driver;
-	 String RootFile = System.getProperty("user.dir");
+public class TestListener extends TestBase implements ITestListener {
+	 
+	public TestListener(WebDriver driver) throws Exception {
+		super(driver);
+		// TODO Auto-generated constructor stub
+	}
+
+    String RootFile = System.getProperty("user.dir");
 	public void onTestStart(ITestResult result) {
 		// TODO Auto-generated method stub
 		
@@ -35,7 +40,7 @@ public class TestListener implements ITestListener{
 	
 	 public void takeScreenShot(String methodName) {
 	    	//get the driver
-	    	driver=new DriverScript().getDriver();
+	    	
 	    	 File scrFile = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
 	         //The below method will save the screen shot in d drive with test method name 
 	            try {

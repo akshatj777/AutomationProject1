@@ -24,36 +24,41 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Set;
+
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import com.online.resources.DriverScript;
+public abstract class PageBase{
 
-public class BaseClass {
 	
-	public WebDriver driver = null;
-	protected static long Wait_Time = 1000L;
+    public Logger log = TestBase.log;
+    protected static long Wait_Time = 1000L;
 	protected static long delay_Time = 2000L;
 	protected static long LongDelay_Time = 5000L;
 	public static Properties Cache=new Properties();
 	public static Properties properties=new Properties();
 	static InputStream inPropFile = null;
 	FileInputStream fisCache;
-	OutputStream outPropFile;
+    OutputStream outPropFile;
 	Actions actionEvent;
-	public BaseClass(final WebDriver driver) {
-		this.driver = driver;
-	}
+	public static WebDriver driver=null;
 	
-	public WebDriverWait waitTo()
+    public PageBase() throws Exception {
+    	this.driver=TestBase.driver;
+    	PageFactory.initElements(driver, this);
+	}
+    
+    public WebDriverWait waitTo()
 	{
 		WebDriverWait wait = new WebDriverWait(driver, 200);
 		return wait;
@@ -95,8 +100,8 @@ public class BaseClass {
 					}
 				}
 			}
-		}
-	}
+		}}
+	
 
 	public List<String> getTextForElementfromList(String element) {
 		List<WebElement> listItems = driver.findElements(By.cssSelector(element));
@@ -482,28 +487,28 @@ public class BaseClass {
 	}
 	
 	
-	public String fetchParticipantID(String query) throws ClassNotFoundException, SQLException  {
-		HashMap<String, HashMap<String, String>> row = new HashMap<String,HashMap<String,String>>();
-	    Class.forName("com.mysql.jdbc.Driver");
-	    String connectionString = "jdbc:mysql://"+DriverScript.Config.getProperty("MySQLServerName")+":3306"; 
-	    Connection con=DriverManager.getConnection(connectionString,DriverScript.Config.getProperty("MySQLDBUserName"),DriverScript.Config.getProperty("MySQLPassword")); 
-	    Statement stmt=con.createStatement();  
-	    ResultSet rs=stmt.executeQuery(query);
-	    ResultSetMetaData rsmd = (ResultSetMetaData) rs.getMetaData();
-	    while(rs.next())
-	    {
-	     HashMap<String, String> column = new HashMap<String, String>();
-	        for(int i=1;i<=rsmd.getColumnCount();i++)
-	        {
-	        column.put(rsmd.getColumnName(i),rs.getString(i));
-	        }
-	        String a = Integer.toString(rs.getRow());
-	        row.put(a, column);
-	        }
-	    String pID = row.get("1").get("id");
-	    con.close();
-	    return pID;
-}
+//	public String fetchParticipantID(String query) throws ClassNotFoundException, SQLException  {
+//		HashMap<String, HashMap<String, String>> row = new HashMap<String,HashMap<String,String>>();
+//	    Class.forName("com.mysql.jdbc.Driver");
+//	    String connectionString = "jdbc:mysql://"+Config.getProperty("MySQLServerName")+":3306"; 
+//	    Connection con=DriverManager.getConnection(Config.getProperty("MySQLDBUserName"),driver); 
+//	    Statement stmt=con.createStatement();  
+//	    ResultSet rs=stmt.executeQuery(query);
+//	    ResultSetMetaData rsmd = (ResultSetMetaData) rs.getMetaData();
+//	    while(rs.next())
+//	    {
+//	     HashMap<String, String> column = new HashMap<String, String>();
+//	        for(int i=1;i<=rsmd.getColumnCount();i++)
+//	        {
+//	        column.put(rsmd.getColumnName(i),rs.getString(i));
+//	        }
+//	        String a = Integer.toString(rs.getRow());
+//	        row.put(a, column);
+//	        }
+//	    String pID = row.get("1").get("id");
+//	    con.close();
+//	    return pID;
+//}
     public void validateDateFormat(String format,String dateToValdate) throws ParseException {
     	SimpleDateFormat formatter = new SimpleDateFormat(format);
 	    formatter.setLenient(false);
@@ -587,22 +592,27 @@ public class BaseClass {
     return name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
 	}
 
-    public String readvaluefromConfig(String filepath,String key){
-    	 File file = new File(filepath);
-   	  
- 		FileInputStream fileInput = null;
- 		try {
- 			fileInput = new FileInputStream(file);
- 		} catch (FileNotFoundException e) {
- 			e.printStackTrace();
- 		}
- 		Properties prop = new Properties();
- 		try {
- 			prop.load(fileInput);
- 		} catch (IOException e) {
- 			e.printStackTrace();
- 		}
- 		return prop.getProperty(key);
- 		
-    }
-}
+	
+	
+	public String getPropertyValue(String PropertyKey,String file){
+		Properties props=null;
+		FileInputStream fin =null;
+		String PropertyValue = null;
+
+		try {
+			File f = new File(System.getProperty("user.dir")+File.separator+"config"+File.separator+file);
+			fin = new FileInputStream(f);
+			props = new Properties();
+			props.load(fin);
+			PropertyValue = props.getProperty(PropertyKey);
+		} catch(Exception e){
+			System.out.println(e.getMessage());
+		} 
+
+		return PropertyValue;
+	}
+    
+    
+  }
+	
+

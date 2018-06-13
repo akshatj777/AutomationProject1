@@ -1,41 +1,123 @@
-package com.online.resources;
+package com.online.baseClass;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.log4j.Logger;
+import org.apache.log4j.xml.DOMConfigurator;
+import org.junit.Assert;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Point;
+import org.openqa.selenium.UnexpectedAlertBehaviour;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriverService;
+import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.annotations.AfterSuite;
 
-public class DriverScript {
-	protected static WebDriver driver;
+public abstract class TestBase {
+	
+	public static WebDriver driver = null;
+	protected static long Wait_Time = 1000L;
+	protected static long delay_Time = 2000L;
+	protected static long LongDelay_Time = 5000L;
+	public static Properties Cache=new Properties();
+	public static Properties properties=new Properties();
+	static InputStream inPropFile = null;
+	FileInputStream fisCache;
+	public static Logger log = null;
+	OutputStream outPropFile;
+	Actions actionEvent;
+	public static Properties config=null;
+	public static Properties data=null;
+	
 	public static Properties Config = null;
 	public static FileInputStream fis;
 	public static File directory = new File(".");
 	public static String os;
 	public static String browser;
+	
+	public static WebDriverWait wait = null;
+			
+	public TestBase(final WebDriver driver) throws Exception {
+		this.driver = driver;
+		initLogs();
+		initConfig();
+		initDriver();
+	}
+	
+	private static void initLogs(){
+		if (log == null){
+			// Initialize Log4j logs
 
-	public DriverScript() {
-		try {
-			initialize();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			DOMConfigurator.configure(System.getProperty("user.dir")+File.separator+"config"+File.separator+"log4j.xml");
+			log = Logger.getLogger("MyLogger");
+			log.info("Logger is initialized..");
+		}
+	}
+	
+	private static void initConfig(){
+		try{
+		if (config == null) {
+			config = new Properties();
+			String config_fileName = "config.properties";
+			String config_path = System.getProperty("user.dir") + File.separator+ "config" + File.separator + config_fileName;
+			FileInputStream config_ip = new FileInputStream(config_path);
+			config.load(config_ip);
+		}
+			//initialize data properties file
+			data = new Properties();
+			String data_fileName = "data.properties";
+			String data_path = System.getProperty("user.dir") + File.separator+ "config" + File.separator + data_fileName;
+			FileInputStream data_ip = new FileInputStream(data_path);
+			data.load(data_ip);
+			
+		}catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public void initialize() throws Exception {
+	public void initDriver() throws Exception {
 		if (Config == null) {
 
 			Config = new Properties();
@@ -58,21 +140,13 @@ public class DriverScript {
 			
 			createNewDriverInstance();
 	}
-
-	private void createNewDriverInstance() throws Exception {
-		
-		/*
-		 *Feature was being used to parameterize the data using Constant.java file.
-		 * Now we are using properties file to store the data, so deprecated variable uses.
-		browser = Constants.Browser;
-		os = Constants.OS;
-		*/
-
+	
+	public static void createNewDriverInstance() throws IOException{
 		browser = Config.getProperty("Browser");
 		os = Config.getProperty("OS");
-		//System.out.println("initialize Browser: " + browser);
-		//System.out.println("initialize OS: " + os);
-
+		log.info("initialize Browser: "+config.getProperty("browser"));
+		log.info("initialize OS: "+config.getProperty("OS"));
+		
 		switch (browser) {
 		case "chrome":
 			String importDir = System.getProperty("user.dir");
@@ -176,16 +250,39 @@ public class DriverScript {
 			
 			driver = new FirefoxDriver(options1);
 			}
-		
-	}
+     	log.info(config.getProperty("browser")+" driver is initialized..");
+		String waitTime = "30";
+		driver.manage().timeouts().implicitlyWait(Long.parseLong(waitTime), TimeUnit.SECONDS);
+		driver.manage().window().setPosition(new Point(0, 0));
+		driver.manage().window().maximize();
 
-	public WebDriver getDriver() {
-		return driver;
+		//Explicit Wait + Expected Conditions
+		wait=new WebDriverWait(driver, 120);
 	}
+	
 
-	public void quitDriver() {
-		driver.manage().deleteAllCookies();
+	@AfterSuite
+	public void tearDown() {
+		quitDriver();
+	}
+	
+	protected void assertStrings(String actual, String expected){
+        	Assert.assertEquals(actual, expected);
+			log.info("Actual string: [ "+actual+" ] does match with Expected string: [ "+expected+" ]");		
+
+	} 
+
+	/**
+	 * Quit Driver.
+	 */
+	public static void quitDriver() {
+
 		driver.quit();
 		driver = null;
+		log.info("Closing Browser.");
+
 	}
+	
+	
+
 }
