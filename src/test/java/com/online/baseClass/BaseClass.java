@@ -37,7 +37,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.online.resources.DriverScript;
 
-public abstract class BaseClass {
+public class BaseClass {
 	
 	public WebDriver driver = null;
 	protected static long Wait_Time = 1000L;
