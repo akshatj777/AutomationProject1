@@ -2,16 +2,8 @@ package com.online.baseClass;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -19,7 +11,6 @@ import java.time.Period;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
@@ -51,10 +42,10 @@ public abstract class PageBase{
 	FileInputStream fisCache;
     OutputStream outPropFile;
 	Actions actionEvent;
-	public static WebDriver driver=null;
+	protected WebDriver driver = null;
 	
-    public PageBase() throws Exception {
-    	this.driver=TestBase.driver;
+    public PageBase(WebDriver driver) {
+    	this.driver=driver;
     	PageFactory.initElements(driver, this);
 	}
     

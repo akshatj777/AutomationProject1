@@ -65,22 +65,28 @@ public abstract class TestBase {
 	public static Logger log = null;
 	OutputStream outPropFile;
 	Actions actionEvent;
-	public static Properties config=null;
+//	public static Properties config=null;
 	public static Properties data=null;
 	
 	public static Properties Config = null;
 	public static FileInputStream fis;
 	public static File directory = new File(".");
 	public static String os;
+	private static boolean isInitalized=false;
 	public static String browser;
 	
 	public static WebDriverWait wait = null;
 			
-	public TestBase(final WebDriver driver) throws Exception {
-		this.driver = driver;
-		initLogs();
-		initConfig();
-		initDriver();
+	protected TestBase() {
+		if(!isInitalized){
+			initLogs();
+			initConfig();
+			try{
+			initDriver();}
+			catch(Exception e){
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	private static void initLogs(){
@@ -94,14 +100,15 @@ public abstract class TestBase {
 	}
 	
 	private static void initConfig(){
-		try{
-		if (config == null) {
-			config = new Properties();
+		
+		if (Config == null) {
+			try{
+			Config = new Properties();
 			String config_fileName = "config.properties";
 			String config_path = System.getProperty("user.dir") + File.separator+ "config" + File.separator + config_fileName;
 			FileInputStream config_ip = new FileInputStream(config_path);
-			config.load(config_ip);
-		}
+			Config.load(config_ip);
+		
 			//initialize data properties file
 			data = new Properties();
 			String data_fileName = "data.properties";
@@ -114,38 +121,20 @@ public abstract class TestBase {
 		}
 		catch (IOException e) {
 			e.printStackTrace();
-		}
+		}}
 	}
 
 	public void initDriver() throws Exception {
-		if (Config == null) {
-
-			Config = new Properties();
-
-			try {
-				String fisFilePath = System.getProperty("user.dir")
-						+ "src//test//java//com//online//resources//config.properties";
-				fis = new FileInputStream(fisFilePath);
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			}
-			try {
-				Config.load(fis);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-
-		if (driver == null)
+		if (driver == null){
 			
-			createNewDriverInstance();
+			createNewDriverInstance();}
 	}
 	
-	public static void createNewDriverInstance() throws IOException{
+	public void createNewDriverInstance() throws IOException{
 		browser = Config.getProperty("Browser");
 		os = Config.getProperty("OS");
-		log.info("initialize Browser: "+config.getProperty("browser"));
-		log.info("initialize OS: "+config.getProperty("OS"));
+		log.info("initialize Browser: "+Config.getProperty("Browser"));
+		log.info("initialize OS: "+Config.getProperty("OS"));
 		
 		switch (browser) {
 		case "chrome":
@@ -156,6 +145,7 @@ public abstract class TestBase {
             chromePrefs.put("download.default_directory", downloadFilepath);
 			String chromDrvrPath;
 			chromDrvrPath = directory.getCanonicalPath() + File.separator + "lib" + File.separator;
+			System.out.println("Chromedriver path"+chromDrvrPath);
 			os: switch (os) {
 			case "linux32":
 			case "linux64":
@@ -164,6 +154,8 @@ public abstract class TestBase {
 						chromDrvrPath + "chromedriver_" + os + File.separator + "chromedriver");
 				break os;
 			case "win":	
+				String value=chromDrvrPath + "chromedriver_" + os + File.separator + "chromedriver.exe";
+				System.out.println("Vale"+value);
 				System.setProperty("webdriver.chrome.driver",
 						chromDrvrPath + "chromedriver_" + os + File.separator + "chromedriver.exe");
 				break os;
@@ -179,8 +171,16 @@ public abstract class TestBase {
 			DesiredCapabilities cap = DesiredCapabilities.chrome();            
 			cap.setCapability(ChromeOptions.CAPABILITY, options);          
 			driver = new ChromeDriver(cap);
+			System.out.println("The Value is"+driver);
+			log.info(Config.getProperty("browser")+" driver is initialized..");
+			String waitTime = "30";
+			driver.manage().timeouts().implicitlyWait(Long.parseLong(waitTime), TimeUnit.SECONDS);
+			driver.manage().window().setPosition(new Point(0, 0));
+			driver.manage().window().maximize();
 
-			break;			
+			//Explicit Wait + Expected Conditions
+			wait=new WebDriverWait(driver, 120);
+            break;			
 		case "ie":
 			String IEDrvrPath;
 			IEDrvrPath = directory.getCanonicalPath() + File.separator + "lib" + File.separator;
@@ -250,14 +250,7 @@ public abstract class TestBase {
 			
 			driver = new FirefoxDriver(options1);
 			}
-     	log.info(config.getProperty("browser")+" driver is initialized..");
-		String waitTime = "30";
-		driver.manage().timeouts().implicitlyWait(Long.parseLong(waitTime), TimeUnit.SECONDS);
-		driver.manage().window().setPosition(new Point(0, 0));
-		driver.manage().window().maximize();
-
-		//Explicit Wait + Expected Conditions
-		wait=new WebDriverWait(driver, 120);
+     
 	}
 	
 

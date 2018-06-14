@@ -8,16 +8,17 @@ import com.online.baseClass.PageBase;
 
 public class Create_Student extends PageBase {
 
-    	WebDriver driver;
-		public Create_Student() {
-			this.driver=driver;
+
+    	
+		public Create_Student(WebDriver driver) throws Exception {
+			super(driver);
 		}
 
 		/*******************************************************************************************
 		 * All WebElements are identified by @FindBy annotation
 		 *******************************************************************************************/
 
-		
+		WebDriver driver;
 		// Web Element for Google Search Box
 		@FindBy(name = "q")
 		WebElement searchBox;
